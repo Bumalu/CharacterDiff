@@ -9,7 +9,7 @@ param(
 
     [Alias("mode")]
     [Parameter(Mandatory=$true)]
-    [ValidateSet("line","lines","char")]
+    [ValidateSet("line","lines","char","pos")]
     [string] $strMode
 )
 
@@ -34,6 +34,27 @@ function Get-CharDifference($strFileA, $strFileB) {
     $distinctChars.SymmetricExceptWith($charsB)
 
     return $distinctChars.Count
+}
+
+function Get-PositionDifference($strFileA, $strFileB) {
+
+    [string] $textA = Get-Content $strFileA -Raw
+    [string] $textB = Get-Content $strFileB -Raw
+
+    [int] $max = [Math]::Max($textA.Length, $textB.Length)
+    [int] $intDiff = 0
+
+    for ([int] $i = 0; $i -lt $max; $i++) {
+
+        [string] $charA = if ($i -lt $textA.Length) { [string] $textA[$i] } else { "" }
+        [string] $charB = if ($i -lt $textB.Length) { [string] $textB[$i] } else { "" }
+
+        if ($charA -ne $charB) {
+            $intDiff++
+        }
+    }
+
+    return $intDiff
 }
 
 function Get-LineDifference($strFileA, $strFileB) {
@@ -69,5 +90,9 @@ switch ($strMode) {
 
     "char" {
         Get-CharDifference $strFileA $strFileB
+    }
+
+    "pos" {
+        Get-PositionDifference $strFileA $strFileB
     }
 }

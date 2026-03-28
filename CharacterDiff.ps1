@@ -16,40 +16,40 @@ param(
 
 function Get-CharDifference($strFileA, $strFileB) {
 
-    [string] $textA = Get-Content $strFileA -Raw
-    [string] $textB = Get-Content $strFileB -Raw
+    [string] $strTextA = Get-Content $strFileA -Raw
+    [string] $strTextB = Get-Content $strFileB -Raw
 
-    $charsA = [System.Collections.Generic.HashSet[string]]::new()
-    $charsB = [System.Collections.Generic.HashSet[string]]::new()
+    $hashSetCharsA = [System.Collections.Generic.HashSet[string]]::new()
+    $hashSetCharsB = [System.Collections.Generic.HashSet[string]]::new()
 
-    foreach ($char in $textA.ToCharArray()) {
-        [void] $charsA.Add([string] $char)
+    foreach ($strChar in $strTextA.ToCharArray()) {
+        [void] $hashSetCharsA.Add([string] $strChar)
     }
 
-    foreach ($char in $textB.ToCharArray()) {
-        [void] $charsB.Add([string] $char)
+    foreach ($strChar in $strTextB.ToCharArray()) {
+        [void] $hashSetCharsB.Add([string] $strChar)
     }
 
-    $distinctChars = [System.Collections.Generic.HashSet[string]]::new($charsA)
-    $distinctChars.SymmetricExceptWith($charsB)
+    $hashSetDistinctChars = [System.Collections.Generic.HashSet[string]]::new($hashSetCharsA)
+    $hashSetDistinctChars.SymmetricExceptWith($hashSetCharsB)
 
-    return $distinctChars.Count
+    return $hashSetDistinctChars.Count
 }
 
 function Get-PositionDifference($strFileA, $strFileB) {
 
-    [string] $textA = Get-Content $strFileA -Raw
-    [string] $textB = Get-Content $strFileB -Raw
+    [string] $strTextA = Get-Content $strFileA -Raw
+    [string] $strTextB = Get-Content $strFileB -Raw
 
-    [int] $max = [Math]::Max($textA.Length, $textB.Length)
+    [int] $intMax = [Math]::Max($strTextA.Length, $strTextB.Length)
     [int] $intDiff = 0
 
-    for ([int] $i = 0; $i -lt $max; $i++) {
+    for ([int] $intIndex = 0; $intIndex -lt $intMax; $intIndex++) {
 
-        [string] $charA = if ($i -lt $textA.Length) { [string] $textA[$i] } else { "" }
-        [string] $charB = if ($i -lt $textB.Length) { [string] $textB[$i] } else { "" }
+        [string] $strCharA = if ($intIndex -lt $strTextA.Length) { [string] $strTextA[$intIndex] } else { "" }
+        [string] $strCharB = if ($intIndex -lt $strTextB.Length) { [string] $strTextB[$intIndex] } else { "" }
 
-        if ($charA -ne $charB) {
+        if ($strCharA -ne $strCharB) {
             $intDiff++
         }
     }
@@ -59,13 +59,13 @@ function Get-PositionDifference($strFileA, $strFileB) {
 
 function Get-LineDifference($strFileA, $strFileB) {
 
-    [string[]] $linesA = Get-Content $strFileA
-    [string[]] $linesB = Get-Content $strFileB
+    [string[]] $arrStrLinesA = Get-Content $strFileA
+    [string[]] $arrStrLinesB = Get-Content $strFileB
 
-    $distinctLines = [System.Collections.Generic.HashSet[string]]::new($linesA)
-    $distinctLines.SymmetricExceptWith($linesB)
+    $hashSetDistinctLines = [System.Collections.Generic.HashSet[string]]::new($arrStrLinesA)
+    $hashSetDistinctLines.SymmetricExceptWith($arrStrLinesB)
 
-    return $distinctLines.Count
+    return $hashSetDistinctLines.Count
 }
 
 if (! (Test-Path $strFileA)) {

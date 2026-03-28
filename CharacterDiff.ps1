@@ -9,12 +9,17 @@ param(
 
     [Alias("mode")]
     [Parameter(Mandatory=$true)]
-    [ValidateSet("line","lines","char","pos")]
-    [string] $strMode
+    [ValidateSet("line","char")]
+    [string] $strMode,
+
+    [Alias("compare")]
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("set","pos")]
+    [string] $strCompare = "set"
 )
 
 
-function Get-CharDifference($strFileA, $strFileB) {
+function Get-CharSetDifference($strFileA, $strFileB) {
 
     [string] $strTextA = Get-Content $strFileA -Raw
     [string] $strTextB = Get-Content $strFileB -Raw
@@ -36,7 +41,7 @@ function Get-CharDifference($strFileA, $strFileB) {
     return $hashSetDistinctChars.Count
 }
 
-function Get-PositionDifference($strFileA, $strFileB) {
+function Get-CharPositionDifference($strFileA, $strFileB) {
 
     [string] $strTextA = Get-Content $strFileA -Raw
     [string] $strTextB = Get-Content $strFileB -Raw
@@ -57,7 +62,7 @@ function Get-PositionDifference($strFileA, $strFileB) {
     return $intDiff
 }
 
-function Get-LineDifference($strFileA, $strFileB) {
+function Get-LineSetDifference($strFileA, $strFileB) {
 
     [string[]] $arrStrLinesA = Get-Content $strFileA
     [string[]] $arrStrLinesB = Get-Content $strFileB
@@ -66,6 +71,27 @@ function Get-LineDifference($strFileA, $strFileB) {
     $hashSetDistinctLines.SymmetricExceptWith($arrStrLinesB)
 
     return $hashSetDistinctLines.Count
+}
+
+function Get-LinePositionDifference($strFileA, $strFileB) {
+
+    [string[]] $arrStrLinesA = Get-Content $strFileA
+    [string[]] $arrStrLinesB = Get-Content $strFileB
+
+    [int] $intMax = [Math]::Max($arrStrLinesA.Length, $arrStrLinesB.Length)
+    [int] $intDiff = 0
+
+    for ([int] $intIndex = 0; $intIndex -lt $intMax; $intIndex++) {
+
+        [string] $strLineA = if ($intIndex -lt $arrStrLinesA.Length) { $arrStrLinesA[$intIndex] } else { "" }
+        [string] $strLineB = if ($intIndex -lt $arrStrLinesB.Length) { $arrStrLinesB[$intIndex] } else { "" }
+
+        if ($strLineA -ne $strLineB) {
+            $intDiff++
+        }
+    }
+
+    return $intDiff
 }
 
 if (! (Test-Path $strFileA)) {
@@ -81,18 +107,16 @@ if (! (Test-Path $strFileB)) {
 switch ($strMode) {
 
     "line" {
-        Get-LineDifference $strFileA $strFileB
-    }
-
-    "lines" {
-        Get-LineDifference $strFileA $strFileB
+        switch ($strCompare) {
+            "set" { Get-LineSetDifference $strFileA $strFileB }
+            "pos" { Get-LinePositionDifference $strFileA $strFileB }
+        }
     }
 
     "char" {
-        Get-CharDifference $strFileA $strFileB
-    }
-
-    "pos" {
-        Get-PositionDifference $strFileA $strFileB
+        switch ($strCompare) {
+            "set" { Get-CharSetDifference $strFileA $strFileB }
+            "pos" { Get-CharPositionDifference $strFileA $strFileB }
+        }
     }
 }
